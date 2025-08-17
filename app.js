@@ -1,80 +1,110 @@
-// Configura tus endpoints aquí
 const SHEETDB_ARTICULOS = 'https://sheetdb.io/api/v1/q95fbg5almox4';
 const SHEETDB_COMBINADO = 'https://sheetdb.io/api/v1/met275r8atidi';
 const APPSCRIPT_RESERVA = 'https://script.google.com/macros/s/AKfycbya4ZxFq1rNzUyRzes4lOfLQ6PwE9DC8xd_ZuNXoWlg_6nlggu4E7ekNKJmeguvz4Zq/exec';
 
-// Carrusel y Promociones
-async function cargarDatosCombinados() {
-  const res = await fetch(SHEETDB_COMBINADO);
-  const datos = await res.json();
+let HABITACIONES = [];
+let selectedHabitacion = null;
 
-  const carrusel = datos.filter(d => d.Tipo === 'Carrusel');
-  const promociones = datos.filter(d => d.Tipo === 'Promocion');
-
-  // Carrusel
+// Carrusel automático
+let carruselTimeoutId = null;
+function cargarDatosCombinados() {
+  fetch(SHEETDB_COMBINADO)
+    .then(res => res.json())
+    .then(datos => {
+      const carrusel = datos.filter(d => d.Tipo === 'Carrusel');
+      const promociones = datos.filter(d => d.Tipo === 'Promocion');
+      renderCarrusel(carrusel);
+      renderPromos(promociones);
+    });
+}
+function renderCarrusel(carrusel) {
   const carruselDiv = document.getElementById('carrusel');
-  function renderCarrusel(i) {
+  let idx = 0;
+  function show(idxLocal) {
+    idx = idxLocal;
     carruselDiv.innerHTML = `
-      <img class="carrusel-img" src="${carrusel[i].Imagen}" alt="Foto hotel" />
+      <img class="carrusel-img" src="${carrusel[idx].Imagen}" alt="Foto hotel" />
       <div class="carrusel-controls">
-        ${carrusel.map((_, j) => `<button ${j===i?'class="active"':''} onclick="window.setCarrusel(${j})">${j+1}</button>`).join('')}
+        ${carrusel.map((_, j) => `<button ${j===idx?'class="active"':''} onclick="window.setCarrusel(${j})">${j+1}</button>`).join('')}
       </div>
-      ${carrusel[i]['Texto Carrusel'] ? `<div class="carrusel-text">${carrusel[i]['Texto Carrusel']}</div>` : ''}
+      ${carrusel[idx]['Texto Carrusel'] ? `<div class="carrusel-text">${carrusel[idx]['Texto Carrusel']}</div>` : ''}
     `;
-    window.setCarrusel = renderCarrusel;
+    window.setCarrusel = (i) => { clearTimeout(carruselTimeoutId); show(i); autoAdvance(); };
   }
-  if (carrusel.length > 0) renderCarrusel(0);
-
-  // Promociones (con imagen siempre)
+  function autoAdvance() {
+    carruselTimeoutId = setTimeout(() => {
+      let next = (idx + 1) % carrusel.length;
+      show(next);
+      autoAdvance();
+    }, 4000);
+  }
+  show(0);
+  autoAdvance();
+}
+function renderPromos(promociones) {
   const promoDiv = document.getElementById('promociones');
-  promoDiv.innerHTML = '<h2>Promociones</h2>' + promociones.map(promo => `
-    <div class="promo-card">
-      <img src="${promo.Imagen}" class="promo-img" alt="Promo" />
-      <div>
-        <h3>${promo['Título Promo']}</h3>
-        <p>${promo['Detalle Promo']}</p>
-        ${promo.Vigencia ? `<p class="vigencia">Válido hasta: ${promo.Vigencia}</p>` : ''}
+  promoDiv.innerHTML = '<h2>Promociones</h2><div class="cards-row">' +
+    promociones.map(promo => `
+      <div class="promo-card">
+        <img src="${promo.Imagen}" class="promo-img" alt="Promo" />
+        <div class="promo-title">${promo['Título Promo']}</div>
+        <div class="promo-detail">${promo['Detalle Promo']}</div>
+        ${promo.Vigencia ? `<div class="promo-vigencia">Válido hasta: ${promo.Vigencia}</div>` : ''}
       </div>
-    </div>
-  `).join('');
+    `).join('') + '</div>';
 }
 cargarDatosCombinados();
 
-// Habitaciones: filtro en el frontend
+// Habitaciones cards fila 4
 async function cargarHabitaciones() {
-  // Trae todos los productos activos
   const res = await fetch(SHEETDB_ARTICULOS + '/search?Estado=Activo');
   const articulos = await res.json();
-
-  // Filtra solo las habitaciones activas
-  const habitaciones = articulos.filter(
+  HABITACIONES = articulos.filter(
     art => art['Tipo articulo'] && art['Tipo articulo'].trim().toLowerCase() === 'habitacion'
   );
-
   const div = document.getElementById('habitaciones');
-  div.innerHTML = '<h2>Habitaciones</h2>' + habitaciones.map(hab => `
-    <div class="habitacion-card">
-      <img src="${hab.Url_imagen || hab.Imagen}" class="habitacion-img" alt="Habitación" />
-      <div class="habitacion-details">
+  div.innerHTML = '<h2>Habitaciones</h2><div class="cards-row">' +
+    HABITACIONES.map((hab, idx) => `
+      <div class="habitacion-card">
+        <img src="${hab.Url_imagen || hab.Imagen}" class="habitacion-img" alt="Habitación" />
         <div class="habitacion-title">${hab.Descripcion}</div>
         <div class="habitacion-precio">L. ${parseFloat(hab['Precio Und']).toFixed(2)} / noche</div>
         <div class="habitacion-capacidad">Capacidad: ${hab.Unidades || 1} personas</div>
-        <div class="habitacion-recargo">Recargo por persona adicional: L. ${parseFloat(hab.Recargo || 0).toFixed(2)}</div>
-        <p>${hab.Catalago || ''}</p>
+        <div class="habitacion-recargo">Recargo adicional: L. ${parseFloat(hab.Recargo || 0).toFixed(2)}</div>
+        <p style="font-size:0.97em;color:#8b5a2b;">${hab.Catalago || ''}</p>
+        <button class="btn-reservar" onclick="seleccionarHabitacion('${hab.Codigo}')">Reservar</button>
       </div>
-    </div>
-  `).join('');
-  window.HABITACIONES = habitaciones;
+    `).join('') + '</div>';
 }
 cargarHabitaciones();
 
-// Formulario atractivo de reserva
+// Botón Reservar en cada card
+window.seleccionarHabitacion = function(codigo) {
+  selectedHabitacion = HABITACIONES.find(h => h.Codigo === codigo);
+  window.scrollTo({top: document.getElementById('reservar').offsetTop - 50, behavior: 'smooth'});
+  renderReservaForm();
+};
+
+// Formulario solo para la habitación seleccionada
 function renderReservaForm() {
   const div = document.getElementById('reservar');
+  if (!selectedHabitacion) {
+    div.innerHTML = `
+      <div class="form-card">
+        <h2 style="text-align:center;color:#378a31;margin-bottom:1em;"><span>📝</span> Reserva tu habitación</h2>
+        <p>Selecciona primero una habitación para reservar.</p>
+      </div>
+    `;
+    return;
+  }
   div.innerHTML = `
     <div class="form-card">
       <h2 style="text-align:center;color:#378a31;margin-bottom:1em;"><span>📝</span> Reserva tu habitación</h2>
       <form id="formReserva" autocomplete="off">
+        <div style="text-align:center;margin-bottom:1em">
+          <img src="${selectedHabitacion.Url_imagen || selectedHabitacion.Imagen}" style="width:120px;height:100px;object-fit:cover;border-radius:10px;box-shadow:0 2px 8px #8b5a2b44;"><br>
+          <span style="font-size:1.1em;font-weight:bold;color:#378a31;">${selectedHabitacion.Descripcion}</span>
+        </div>
         <label><span>👤</span> Nombre completo:</label>
         <input required name="nombre" placeholder="Ingresa tu nombre completo" />
         <label><span>📱</span> Teléfono:</label>
@@ -91,73 +121,56 @@ function renderReservaForm() {
         <label><span>⏰</span> Hora de salida:</label>
         <input type="time" required name="hora_salida" />
         <hr class="form-separator" />
-        <div id="habitacionesReserva"></div>
+        <div>
+          <label>Cantidad de habitaciones:</label>
+          <input type="number" min="1" max="5" name="cantidad" value="1" style="width:80px;" />
+          <label>Personas por habitación:</label>
+          <input type="number" min="1" max="${selectedHabitacion.Unidades || 1}" name="personas" value="1" style="width:70px;" />
+        </div>
         <div id="totalReserva"></div>
         <div id="resumenReserva"></div>
         <button type="submit"><span>🔒</span> Reservar ahora</button>
       </form>
     </div>
   `;
-  renderHabitacionesReserva();
   document.getElementById('formReserva').onsubmit = enviarReserva;
-}
-
-function renderHabitacionesReserva() {
-  const habs = window.HABITACIONES || [];
-  const div = document.getElementById('habitacionesReserva');
-  div.innerHTML = `<h3 style="color:#8b5a2b;">Habitaciones</h3>` +
-    habs.map((hab, idx) => `
-      <div class="form-habitacion-row">
-        <img src="${hab.Url_imagen || hab.Imagen}" class="form-habitacion-img" alt="Hab" />
-        <div class="form-habitacion-details">
-          <label>${hab.Descripcion} <span style="color:#378a31;">(L. ${parseFloat(hab['Precio Und']).toFixed(2)})</span></label>
-          <span style="font-size:0.95em;color:#378a31;">Capacidad: ${hab.Unidades || 1} personas</span>
-          <br>
-          <span style="font-size:0.9em;color:#8b5a2b;">Recargo pers. adicional: L. ${parseFloat(hab.Recargo || 0).toFixed(2)}</span>
-          <br>
-          <input type="number" min="0" max="5" name="hab${hab.Codigo}_cant" placeholder="Cantidad" value="0" style="width:80px;" />
-          <label style="font-size:0.95em;">Personas por habitación:</label>
-          <input type="number" min="1" max="${hab.Unidades || 1}" name="hab${hab.Codigo}_pers" value="1" style="width:70px;" />
-        </div>
-      </div>
-    `).join('');
-}
-
-// Resumen visual y total
-function calcularTotalReserva() {
-  const habs = window.HABITACIONES || [];
-  let total = 0;
-  let resumen = [];
-  habs.forEach(hab => {
-    const cant = +document.querySelector(`[name="hab${hab.Codigo}_cant"]`)?.value || 0;
-    const pers = +document.querySelector(`[name="hab${hab.Codigo}_pers"]`)?.value || 1;
-    const capacidad = parseInt(hab.Unidades) || 1;
-    if (cant > 0) {
-      const subtotal = cant * parseFloat(hab['Precio Und']);
-      const recargo = pers > capacidad ? (pers-capacidad) * parseFloat(hab.Recargo || 0) * cant : 0;
-      total += subtotal + recargo;
-      resumen.push(`<li><b>${hab.Descripcion}</b> (${cant} habitación${cant>1?'es':''}, ${pers} personas/hab)
-        <br>Subtotal: L. ${subtotal.toFixed(2)}, Recargo: L. ${recargo.toFixed(2)}
-        </li>`);
-    }
+  calcularTotalReserva();
+  document.querySelectorAll('#formReserva input[name="cantidad"], #formReserva input[name="personas"]').forEach(inp => {
+    inp.addEventListener('input', calcularTotalReserva);
   });
+}
+
+// Resumen visual y total para la habitación seleccionada
+function calcularTotalReserva() {
+  if (!selectedHabitacion) return;
+  const cantidad = +document.querySelector('#formReserva [name="cantidad"]')?.value || 1;
+  const personas = +document.querySelector('#formReserva [name="personas"]')?.value || 1;
+  const capacidad = parseInt(selectedHabitacion.Unidades) || 1;
+  const precioBase = cantidad * parseFloat(selectedHabitacion['Precio Und']);
+  const recargo = personas > capacidad ? (personas-capacidad) * parseFloat(selectedHabitacion.Recargo || 0) * cantidad : 0;
+  const total = precioBase + recargo;
   document.getElementById('totalReserva').innerHTML =
     `<div>Total estimado: <span style="color:#8b5a2b;">L. ${total.toFixed(2)}</span></div>`;
-  document.getElementById('resumenReserva').innerHTML = resumen.length
-    ? `<div class="form-summary-card"><h4>Tu selección</h4><ul>${resumen.join('')}</ul></div>`
-    : '';
+  document.getElementById('resumenReserva').innerHTML =
+    `<div class="form-summary-card"><h4>Tu selección</h4>
+      <ul>
+        <li><b>${selectedHabitacion.Descripcion}</b> (${cantidad} habitación${cantidad>1?'es':''}, ${personas} personas/hab)
+          <br>Subtotal: L. ${precioBase.toFixed(2)}, Recargo: L. ${recargo.toFixed(2)}
+        </li>
+      </ul>
+    </div>`;
   return total;
 }
-document.addEventListener('input', () => calcularTotalReserva());
-
-// Cargar el formulario al inicio
-window.onload = renderReservaForm;
 
 // Enviar reserva a Google Sheets + WhatsApp
 async function enviarReserva(e) {
   e.preventDefault();
+  if (!selectedHabitacion) return;
   const form = e.target;
-  const habs = window.HABITACIONES || [];
+  const cantidad = +form.cantidad.value || 1;
+  const personas = +form.personas.value || 1;
+  const capacidad = parseInt(selectedHabitacion.Unidades) || 1;
+
   const reserva = {
     nombre: form.nombre.value,
     telefono: form.telefono.value,
@@ -166,24 +179,16 @@ async function enviarReserva(e) {
     hora_entrada: form.hora_entrada.value,
     fecha_salida: form.fecha_salida.value,
     hora_salida: form.hora_salida.value,
-    habitaciones: [],
+    habitaciones: [{
+      codigo: selectedHabitacion.Codigo,
+      descripcion: selectedHabitacion.Descripcion,
+      cantidad,
+      personas,
+      precio: parseFloat(selectedHabitacion['Precio Und']),
+      recargo: personas > capacidad ? (personas - capacidad) * parseFloat(selectedHabitacion.Recargo || 0) : 0
+    }],
     total: calcularTotalReserva()
   };
-  habs.forEach(hab => {
-    const cant = +form[`hab${hab.Codigo}_cant`]?.value || 0;
-    const pers = +form[`hab${hab.Codigo}_pers`]?.value || 1;
-    const capacidad = parseInt(hab.Unidades) || 1;
-    if (cant > 0) {
-      reserva.habitaciones.push({
-        codigo: hab.Codigo,
-        descripcion: hab.Descripcion,
-        cantidad: cant,
-        personas: pers,
-        precio: parseFloat(hab['Precio Und']),
-        recargo: pers > capacidad ? (pers - capacidad) * parseFloat(hab.Recargo || 0) : 0
-      });
-    }
-  });
 
   // Generar No Venta
   const now = new Date();
@@ -205,6 +210,11 @@ async function enviarReserva(e) {
   window.open(`https://wa.me/50493605881?text=${encodeURIComponent(msg)}`, '_blank');
   alert('Reserva enviada correctamente. Pronto recibirá confirmación.');
   form.reset();
-  renderHabitacionesReserva();
-  calcularTotalReserva();
+  selectedHabitacion = null;
+  renderReservaForm();
 }
+
+// Inicializa el formulario vacío al cargar
+window.onload = function() {
+  renderReservaForm();
+};

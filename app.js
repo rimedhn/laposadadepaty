@@ -46,18 +46,18 @@ async function cargarHabitaciones() {
   const res = await fetch(SHEETDB_ARTICULOS + '?search=Tipo articulo,Habitacion&search=Estado,Activo');
   const habitaciones = await res.json();
   const div = document.getElementById('habitaciones');
-  div.innerHTML = '<h2>Habitaciones</h2>' + habitaciones.map(hab => `
-    <div class="habitacion-card">
-      <img src="${hab.Url_imagen || hab.Imagen}" class="habitacion-img" alt="Habitación" />
-      <div class="habitacion-details">
-        <div class="habitacion-title">${hab.Descripcion}</div>
-        <div class="habitacion-precio">L. ${parseFloat(hab['Precio Und']).toFixed(2)} / noche</div>
-        <div class="habitacion-capacidad">Capacidad: ${hab.Unidades} personas</div>
-        <div class="habitacion-recargo">Recargo por persona adicional: L. ${parseFloat(hab.Recargo || 0).toFixed(2)}</div>
-        <p>${hab.Catalago || ''}</p>
-      </div>
+div.innerHTML = '<h2>Habitaciones</h2>' + habitaciones.map(hab => `
+  <div class="habitacion-card">
+    <img src="${hab.Url_imagen || hab.Imagen}" class="habitacion-img" alt="Habitación" />
+    <div class="habitacion-details">
+      <div class="habitacion-title">${hab.Descripcion}</div>
+      <div class="habitacion-precio">L. ${parseFloat(hab['Precio Und']).toFixed(2)} / noche</div>
+      <div class="habitacion-capacidad">Capacidad: ${hab.Unidades} personas</div>
+      <div class="habitacion-recargo">Recargo por persona adicional: L. ${parseFloat(hab.Recargo || 0).toFixed(2)}</div>
+      <p>${hab.Catalago || ''}</p>
     </div>
-  `).join('');
+  </div>
+`).join('');
   window.HABITACIONES = habitaciones;
 }
 cargarHabitaciones();

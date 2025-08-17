@@ -42,10 +42,17 @@ async function cargarDatosCombinados() {
 cargarDatosCombinados();
 
 // Cargar Habitaciones desde Google Sheets (Articulos)
-async function cargarHabitaciones() {
-  const res = await fetch(SHEETDB_ARTICULOS + '?search=Tipo articulo,Habitacion&search=Estado,Activo');
-  const habitaciones = await res.json();
-  const div = document.getElementById('habitaciones');
+// 1. Trae todos los productos activos (sin filtrar por tipo)
+const res = await fetch(SHEETDB_ARTICULOS + '/search?Estado=Activo');
+const articulos = await res.json();
+
+// 2. Filtra solo las habitaciones
+const habitaciones = articulos.filter(
+  art => art['Tipo articulo'] === 'Habitacion'
+);
+
+// 3. Renderiza las habitaciones como antes
+const div = document.getElementById('habitaciones');
 div.innerHTML = '<h2>Habitaciones</h2>' + habitaciones.map(hab => `
   <div class="habitacion-card">
     <img src="${hab.Url_imagen || hab.Imagen}" class="habitacion-img" alt="Habitación" />
@@ -58,7 +65,7 @@ div.innerHTML = '<h2>Habitaciones</h2>' + habitaciones.map(hab => `
     </div>
   </div>
 `).join('');
-  window.HABITACIONES = habitaciones;
+window.HABITACIONES = habitaciones;
 }
 cargarHabitaciones();
 

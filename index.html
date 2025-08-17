@@ -28,7 +28,35 @@
     <section id="carrusel"></section>
     <section id="habitaciones"></section>
     <section id="promociones"></section>
-    <section id="reservar"></section>
+    <section id="reservar">
+      <div class="form-card">
+        <h2>Reservar habitación</h2>
+        <form id="formReserva">
+          <label for="nombre">Nombre:</label>
+          <input id="nombre" name="nombre" required />
+
+          <label for="telefono">Teléfono:</label>
+          <input id="telefono" name="telefono" required />
+
+          <label for="email">Email:</label>
+          <input id="email" name="email" type="email" required />
+
+          <label for="fecha_entrada">Fecha de Entrada:</label>
+          <input id="fecha_entrada" name="fecha_entrada" type="date" required />
+
+          <label for="fecha_salida">Fecha de Salida:</label>
+          <input id="fecha_salida" name="fecha_salida" type="date" required />
+
+          <div id="habitacionesContainer">
+            <!-- Bloques de habitaciones aquí -->
+          </div>
+          <button type="button" id="addHabitacionBtn" class="btn-reservar">Agregar habitación</button>
+
+          <div id="totalReserva"></div>
+          <button type="submit">Reservar</button>
+        </form>
+      </div>
+    </section>
   </main>
   <footer>
     <div class="footer-info">

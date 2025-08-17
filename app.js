@@ -52,6 +52,7 @@ const habitaciones = articulos.filter(
 );
 
 // 3. Renderiza las habitaciones como antes
+async function cargarHabitaciones() {
 const div = document.getElementById('habitaciones');
 div.innerHTML = '<h2>Habitaciones</h2>' + habitaciones.map(hab => `
   <div class="habitacion-card">

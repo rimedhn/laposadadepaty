@@ -13,6 +13,7 @@ header {
 .logo {
   width: 70px;
   vertical-align: middle;
+  border-radius: 5px;
 }
 nav {
   display: flex;

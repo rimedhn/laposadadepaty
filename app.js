@@ -1,6 +1,6 @@
 const SHEETDB_ARTICULOS = 'https://sheetdb.io/api/v1/q95fbg5almox4';
 const SHEETDB_COMBINADO = 'https://sheetdb.io/api/v1/met275r8atidi';
-const APPSCRIPT_RESERVA = 'https://script.google.com/macros/s/AKfycbya4ZxFq1rNzUyRzes4lOfLQ6PwE9DC8xd_ZuNXoWlg_6nlggu4E7ekNKJmeguvz4Zq/exec';
+const APPSCRIPT_RESERVA = 'https://script.google.com/macros/s/AKfycbwuvAPFV1a_-URDCgMV1y11tSdrggijIIWtMHrsYSFw2gRQtvxjIyCXKorp-edIBgl6/exec';
 
 let HABITACIONES = [];
 let selectedHabitacion = null;

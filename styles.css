@@ -57,187 +57,6 @@ main {
 section {
   margin-bottom: 3em;
 }
-
-/* Carrusel */
-#carrusel {
-  width: 100%;
-  max-width: 900px;
-  margin: 1em auto;
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(80,60,30,0.2);
-}
-.carrusel-img {
-  width: 100%;
-  height: 320px;
-  object-fit: cover;
-  border-radius: 12px;
-  display: block;
-}
-.carrusel-controls {
-  display: flex;
-  justify-content: center;
-  gap: 1em;
-  margin: 0.5em 0;
-}
-.carrusel-controls button {
-  background: #e5f1e2;
-  border: 1px solid #8b5a2b;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-weight: bold;
-  color: #8b5a2b;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.carrusel-controls button.active,
-.carrusel-controls button:hover {
-  background: #378a31;
-  color: #fff;
-  border-color: #378a31;
-}
-.carrusel-text {
-  text-align: center;
-  font-size: 1.2em;
-  color: #378a31;
-  margin-top: 0.5em;
-  background: #fffbe0;
-  border-radius: 8px;
-  padding: 0.5em 1em;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Cards: Habitaciones y Promos */
-.cards-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1em;
-  justify-content: center;
-  margin-bottom: 2em;
-}
-
-.habitacion-card, .promo-card {
-  flex: 1 1 22%;
-  max-width: 22%;
-  min-width: 220px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px #378a3122;
-  padding: 1em;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: box-shadow .2s;
-  position: relative;
-}
-.habitacion-card:hover, .promo-card:hover {
-  box-shadow: 0 4px 24px #378a3166;
-  transform: translateY(-4px) scale(1.02);
-}
-.habitacion-img, .promo-img {
-  width: 100%;
-  max-width: 180px;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px #8b5a2b44;
-  margin-bottom: 0.6em;
-}
-.habitacion-title {
-  color: #378a31;
-  font-size: 1.1em;
-  font-weight: bold;
-}
-.habitacion-precio {
-  color: #8b5a2b;
-  font-weight: bold;
-  font-size: 1.05em;
-}
-.habitacion-capacidad, .habitacion-recargo {
-  font-size: 0.95em;
-  color: #378a31;
-}
-.habitacion-recargo {
-  color: #8b5a2b;
-}
-.promo-title {
-  font-weight: bold;
-  color: #8b5a2b;
-  font-size: 1.1em;
-  margin-bottom: .3em;
-}
-.promo-detail, .promo-vigencia {
-  font-size: 0.95em;
-  color: #378a31;
-}
-
-/* Botón Reservar */
-.btn-reservar {
-  margin-top: 0.8em;
-  background: linear-gradient(90deg, #378a31 60%, #8b5a2b 100%);
-  color: #fff;
-  font-weight: bold;
-  font-size: 1em;
-  padding: 0.5em 1.4em;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px #378a3122;
-  cursor: pointer;
-  transition: background .2s;
-  width: 80%;
-  text-align: center;
-}
-.btn-reservar:hover {
-  background: linear-gradient(90deg, #8b5a2b 60%, #378a31 100%);
-}
-
-/* Footer Logo */
-.logo-footer {
-  width: 64px;
-  height: auto;
-  margin-bottom: 0.5em;
-  border-radius: 5px;
-  box-shadow: 0 2px 8px #378a3122;
-}
-
-.footer-info {
-  background: #8b5a2b;
-  color: #fff;
-  padding: 2em;
-  text-align: center;
-}
-.footer-info a {
-  color: #378a31;
-  text-decoration: underline;
-}
-.social img {
-  width: 32px;
-  margin: 0 6px;
-}
-.whatsapp-float {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 99;
-  background: #25d366;
-  border-radius: 50%;
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px #25d36655;
-}
-.whatsapp-float img {
-  width: 38px;
-}
-
-/* Reserva Form */
 #reservar {
   max-width: 620px;
   margin: 2em auto;
@@ -282,35 +101,91 @@ section {
   margin-top: 1em;
   margin-bottom: 1em;
 }
-.form-summary-card {
-  background: #e5f1e2;
-  border-radius: 12px;
+.habitacion-block {
+  background: #f8f8f6;
+  margin-bottom: 1.1em;
   padding: 1em;
-  margin-top: 1em;
-  box-shadow: 0 2px 8px #378a3122;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #378a3122;
+  position: relative;
 }
-.form-summary-card h4 {
-  color: #8b5a2b;
-  margin-bottom: 0.5em;
+.habitacion-block label {
+  margin-top: 0.6em;
 }
-.form-summary-card ul {
-  padding-left: 1.2em;
-}
-#formReserva button[type="submit"] {
-  background: linear-gradient(90deg, #378a31 60%, #8b5a2b 100%);
+.habitacion-block .removeHabitacionBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #c94444;
   color: #fff;
-  font-weight: bold;
-  font-size: 1.2em;
-  padding: 0.8em 2em;
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 1px 8px #378a3122;
-  margin-top: 1.2em;
+  border-radius: 28px;
+  font-size: 0.9em;
+  padding: 0.4em 1em;
   cursor: pointer;
   transition: background 0.2s;
 }
-#formReserva button[type="submit"]:hover {
+.habitacion-block .removeHabitacionBtn:hover {
+  background: #a00;
+}
+
+/* Botón Reservar */
+.btn-reservar {
+  margin-top: 0.8em;
+  background: linear-gradient(90deg, #378a31 60%, #8b5a2b 100%);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1em;
+  padding: 0.5em 1.4em;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #378a3122;
+  cursor: pointer;
+  transition: background .2s;
+  width: 80%;
+  text-align: center;
+}
+.btn-reservar:hover {
   background: linear-gradient(90deg, #8b5a2b 60%, #378a31 100%);
+}
+
+.logo-footer {
+  width: 64px;
+  height: auto;
+  margin-bottom: 0.5em;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px #378a3122;
+}
+.footer-info {
+  background: #8b5a2b;
+  color: #fff;
+  padding: 2em;
+  text-align: center;
+}
+.footer-info a {
+  color: #378a31;
+  text-decoration: underline;
+}
+.social img {
+  width: 32px;
+  margin: 0 6px;
+}
+.whatsapp-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99;
+  background: #25d366;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px #25d36655;
+}
+.whatsapp-float img {
+  width: 38px;
 }
 
 /* Responsive */

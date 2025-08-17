@@ -69,7 +69,7 @@ async function cargarHabitaciones() {
         <img src="${hab.Url_imagen || hab.Imagen}" class="habitacion-img" alt="Habitación" />
         <div class="habitacion-title">${hab.Descripcion}</div>
         <div class="habitacion-precio">L. ${parseFloat(hab['Precio Und']).toFixed(2)} / noche</div>
-        <div class="habitacion-capacidad">Capacidad: ${hab.Unidades || 1} personas</div>
+        <div class="habitacion-capacidad">Capacidad: ${parseFloat(hab['Unidades caja']).toFixed(2)} personas</div>
         <div class="habitacion-recargo">Recargo adicional: L. ${parseFloat(hab.Recargo || 0).toFixed(2)}</div>
         <p style="font-size:0.97em;color:#8b5a2b;">${hab.Catalago || ''}</p>
         <button class="btn-reservar" onclick="seleccionarHabitacion('${hab.Codigo}')">Reservar</button>

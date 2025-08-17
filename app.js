@@ -69,8 +69,10 @@ async function cargarHabitaciones() {
         <img src="${hab.Url_imagen || hab.Imagen}" class="habitacion-img" alt="Habitación" />
         <div class="habitacion-title">${hab.Descripcion}</div>
         <div class="habitacion-precio">L. ${parseFloat(hab['Precio Und']).toFixed(2)} / noche</div>
-        <div class="habitacion-capacidad">Capacidad: ${parseFloat(hab['Unidades caja']).toFixed(2)} personas</div>
-        <div class="habitacion-recargo">Recargo adicional: L. ${parseFloat(hab.Recargo || 0).toFixed(2)}</div>
+        <div class="habitacion-capacidad">Capacidad: ${hab['Unidades caja'] || 1} personas</div>
+        <div class="habitacion-recargo">
+          Recargo adicional: ${parseFloat(hab.Recargo || 0)}% por persona extra
+        </div>
         <p style="font-size:0.97em;color:#8b5a2b;">${hab.Catalago || ''}</p>
         <button class="btn-reservar" onclick="seleccionarHabitacion('${hab.Codigo}')">Reservar</button>
       </div>
@@ -125,7 +127,11 @@ function renderReservaForm() {
           <label>Cantidad de habitaciones:</label>
           <input type="number" min="1" max="5" name="cantidad" value="1" style="width:80px;" />
           <label>Personas por habitación:</label>
-          <input type="number" min="1" max="${selectedHabitacion.Unidades || 1}" name="personas" value="1" style="width:70px;" />
+          <input type="number" min="1" name="personas" value="1" style="width:70px;" />
+          <span style="font-size:0.95em;color:#8b5a2b;">
+            Capacidad máxima: ${selectedHabitacion['Unidades caja'] || 1} personas.
+            Recargo: ${parseFloat(selectedHabitacion.Recargo || 0)}% por cada persona adicional.
+          </span>
         </div>
         <div id="totalReserva"></div>
         <div id="resumenReserva"></div>
@@ -145,9 +151,11 @@ function calcularTotalReserva() {
   if (!selectedHabitacion) return;
   const cantidad = +document.querySelector('#formReserva [name="cantidad"]')?.value || 1;
   const personas = +document.querySelector('#formReserva [name="personas"]')?.value || 1;
-  const capacidad = parseInt(selectedHabitacion.Unidades) || 1;
+  const capacidad = parseInt(selectedHabitacion['Unidades caja']) || 1;
   const precioBase = cantidad * parseFloat(selectedHabitacion['Precio Und']);
-  const recargo = personas > capacidad ? (personas-capacidad) * parseFloat(selectedHabitacion.Recargo || 0) * cantidad : 0;
+  const personasExtra = personas > capacidad ? (personas - capacidad) : 0;
+  const recargoPct = parseFloat(selectedHabitacion.Recargo || 0) / 100;
+  const recargo = precioBase * recargoPct * personasExtra;
   const total = precioBase + recargo;
   document.getElementById('totalReserva').innerHTML =
     `<div>Total estimado: <span style="color:#8b5a2b;">L. ${total.toFixed(2)}</span></div>`;
@@ -169,7 +177,12 @@ async function enviarReserva(e) {
   const form = e.target;
   const cantidad = +form.cantidad.value || 1;
   const personas = +form.personas.value || 1;
-  const capacidad = parseInt(selectedHabitacion.Unidades) || 1;
+  const capacidad = parseInt(selectedHabitacion['Unidades caja']) || 1;
+  const precioBase = cantidad * parseFloat(selectedHabitacion['Precio Und']);
+  const personasExtra = personas > capacidad ? (personas - capacidad) : 0;
+  const recargoPct = parseFloat(selectedHabitacion.Recargo || 0) / 100;
+  const recargo = precioBase * recargoPct * personasExtra;
+  const total = precioBase + recargo;
 
   const reserva = {
     nombre: form.nombre.value,
@@ -185,9 +198,9 @@ async function enviarReserva(e) {
       cantidad,
       personas,
       precio: parseFloat(selectedHabitacion['Precio Und']),
-      recargo: personas > capacidad ? (personas - capacidad) * parseFloat(selectedHabitacion.Recargo || 0) : 0
+      recargo: recargo
     }],
-    total: calcularTotalReserva()
+    total: total
   };
 
   // Generar No Venta

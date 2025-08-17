@@ -1,30 +1,47 @@
-// Configura tus endpoints de SheetDB y AppScript aquí
-const SHEETDB_ARTICULOS = 'https://sheetdb.io/api/v1/YOUR_ARTICULOS_ID';
-const SHEETDB_CARRUSEL = 'https://sheetdb.io/api/v1/YOUR_CARRUSEL_ID';
-const SHEETDB_PROMOS = 'https://sheetdb.io/api/v1/YOUR_PROMOS_ID';
-const APPSCRIPT_RESERVA = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+// Configura tus endpoints aquí
+const SHEETDB_ARTICULOS = 'https://sheetdb.io/api/v1/q95fbg5almox4';
+const SHEETDB_COMBINADO = 'https://sheetdb.io/api/v1/met275r8atidi';
+const APPSCRIPT_RESERVA = 'https://script.google.com/macros/s/AKfycbya4ZxFq1rNzUyRzes4lOfLQ6PwE9DC8xd_ZuNXoWlg_6nlggu4E7ekNKJmeguvz4Zq/exec';
 
-// Cargar Carrusel desde Google Sheets
-async function cargarCarrusel() {
-  const res = await fetch(SHEETDB_CARRUSEL);
-  const carrusel = await res.json();
+// Cargar Carrusel y Promociones desde la hoja combinada
+async function cargarDatosCombinados() {
+  const res = await fetch(SHEETDB_COMBINADO);
+  const datos = await res.json();
+
+  // Filtrar Carrusel y Promociones
+  const carrusel = datos.filter(d => d.Tipo === 'Carrusel');
+  const promociones = datos.filter(d => d.Tipo === 'Promocion');
+
+  // Renderizar Carrusel
   const carruselDiv = document.getElementById('carrusel');
-  let idx = 0;
   function renderCarrusel(i) {
     carruselDiv.innerHTML = `
       <img class="carrusel-img" src="${carrusel[i].Imagen}" alt="Foto hotel" />
       <div class="carrusel-controls">
         ${carrusel.map((_, j) => `<button ${j===i?'class="active"':''} onclick="window.setCarrusel(${j})">${j+1}</button>`).join('')}
       </div>
-      ${carrusel[i].Texto ? `<div class="carrusel-text">${carrusel[i].Texto}</div>` : ''}
+      ${carrusel[i]['Texto Carrusel'] ? `<div class="carrusel-text">${carrusel[i]['Texto Carrusel']}</div>` : ''}
     `;
     window.setCarrusel = renderCarrusel;
   }
-  renderCarrusel(0);
-}
-cargarCarrusel();
+  if (carrusel.length > 0) renderCarrusel(0);
 
-// Cargar Habitaciones desde Google Sheets
+  // Renderizar Promociones
+  const promoDiv = document.getElementById('promociones');
+  promoDiv.innerHTML = '<h2>Promociones</h2>' + promociones.map(promo => `
+    <div class="promo-card">
+      <img src="${promo.Imagen}" class="promo-img" alt="Promo" />
+      <div>
+        <h3>${promo['Título Promo']}</h3>
+        <p>${promo['Detalle Promo']}</p>
+        ${promo.Vigencia ? `<p class="vigencia">Válido hasta: ${promo.Vigencia}</p>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+cargarDatosCombinados();
+
+// Cargar Habitaciones desde Google Sheets (Articulos)
 async function cargarHabitaciones() {
   const res = await fetch(SHEETDB_ARTICULOS + '?search=Tipo articulo,Habitacion&search=Estado,Activo');
   const habitaciones = await res.json();
@@ -44,24 +61,6 @@ async function cargarHabitaciones() {
   window.HABITACIONES = habitaciones;
 }
 cargarHabitaciones();
-
-// Cargar Promociones
-async function cargarPromos() {
-  const res = await fetch(SHEETDB_PROMOS);
-  const promos = await res.json();
-  const div = document.getElementById('promociones');
-  div.innerHTML = '<h2>Promociones</h2>' + promos.map(promo => `
-    <div class="promo-card">
-      <img src="${promo.Imagen}" class="promo-img" alt="Promo" />
-      <div>
-        <h3>${promo.Titulo}</h3>
-        <p>${promo.Detalle}</p>
-        ${promo.Vigencia ? `<p class="vigencia">Válido hasta: ${promo.Vigencia}</p>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-cargarPromos();
 
 // Formulario de Reserva
 function renderReservaForm() {
